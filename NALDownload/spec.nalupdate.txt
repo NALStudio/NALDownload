@@ -1,0 +1,43 @@
+TYPE SPEC:
+00000000: Write GZIP to file from the start of the file and Close
+00000001: Write VCDIFF and Close
+00000010: Open File in Current Directory
+00000011: Create and Open File in Current Directory
+00000100: Step Into Directory From Current Directory
+00000101: Step Out Of Current Directory To The Previous Directory
+00000111: Create and Step Into Directory From Current Directory
+11111110: Delete File
+11111111: Delete Directory
+
+INSTRUCTION_SEPARATOR (const): 10101010
+// Byte 10101010 is replaced with 10101010 10101010 on all instruction bodies.
+// Instruction type cannot be equal to INSTRUCTION_SEPARATOR
+
+HEADER EXAMPLE:
+00000000 00000001
+^ spec version (big endian)
+
+INSTRUCTION EXAMPLES:
+INSTRUCTION:
+00000000 (00000000 00000000)
+^ type   ^ (optional) body
+
+WRITE GZIP/VCDIFF INSTRUCTION EXAMPLE:
+00000001 10110000 11111100 00111100
+^ type   ^ body (GZIP/VCDIFF)
+
+STEP IN/OPEN/CREATE&OPEN/DELETE INSTRUCTION EXAMPLE:
+00000100 00010111 10100000 11100011 00010110 01000011
+^ type   ^ body start directory/file (UTF-8)
+Validation of opened/deleted directory/file type recommended. On creation, validate that the file does not exist.
+On directory creation, verify that the directory doesn't exist it's parent exists. This behaviour might change later.
+On directory deletion, directory must be empty. This behaviour might change later.
+
+STEP OUT/CLOSE INSTRUCTION EXAMPLE:
+00000101
+^ type
+Instruction separator byte could be removed, but we will keep it in the spec to make parsing a bit clearer.
+Validation of closed directory/file type and/or name recommended.
+
+WHOLE FILE INSTRUCTION EXAMPLE:
+HEADER INSTRUCTION_SEPARATOR STEP_IN_INSTRUCTION INSTRUCTION_SEPARATOR WRITE_INSTRUCTION
