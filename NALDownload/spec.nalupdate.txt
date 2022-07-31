@@ -1,13 +1,17 @@
 TYPE SPEC:
-00000000: Write GZIP to file from the start of the file and Close
-00000001: Write VCDIFF and Close
-00000010: Open File in Current Directory
-00000011: Create and Open File in Current Directory
-00000100: Step Into Directory From Current Directory
-00000101: Step Out Of Current Directory To The Previous Directory
-00000111: Create and Step Into Directory From Current Directory
-11111110: Delete File
-11111111: Delete Directory
+00000000: Write GZIP to opened file from the start of the file
+00000001: Write VCDIFF to opened file
+00000010: Verify File Hash (MD5)
+00000011: Verify Directory Exists
+00000100: Open File in Current Directory
+00000101: Create and Open File in Current Directory
+00000111: Close File and Go To Containing Directory
+00001100: Step Into Directory From Current Directory
+00001101: Step Out Of Current Directory To The Previous Directory
+00001111: Create and Step Into Directory From Current Directory
+11111100: Delete File
+11111110: Delete Directory
+11111111: Purge Directory (delete directory with it's contents)
 
 INSTRUCTION_SEPARATOR (const): 10101010
 // Byte 10101010 is replaced with 10101010 10101010 on all instruction bodies.
@@ -26,12 +30,15 @@ WRITE GZIP/VCDIFF INSTRUCTION EXAMPLE:
 00000001 10110000 11111100 00111100
 ^ type   ^ body (GZIP/VCDIFF)
 
+VERIFY HASH INSTRUCTION EXAMPLE:
+00000010 10110000 11111100 00111100
+^ type   ^ body (hash)
+
 STEP IN/OPEN/CREATE&OPEN/DELETE INSTRUCTION EXAMPLE:
 00000100 00010111 10100000 11100011 00010110 01000011
 ^ type   ^ body start directory/file (UTF-8)
 Validation of opened/deleted directory/file type recommended. On creation, validate that the file does not exist.
-On directory creation, verify that the directory doesn't exist it's parent exists. This behaviour might change later.
-On directory deletion, directory must be empty. This behaviour might change later.
+On directory creation, verify that the directory doesn't exist and it's parent exists. This behaviour might change later.
 
 STEP OUT/CLOSE INSTRUCTION EXAMPLE:
 00000101

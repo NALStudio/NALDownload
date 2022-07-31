@@ -52,13 +52,15 @@ public abstract class Instruction
         {
             InstructionType.WriteGzip => new WriteGzipInstruction(body),
             InstructionType.WriteVcdiff => new WriteVcdiff(body),
+            InstructionType.Open => new OpenInstruction(body),
+            InstructionType.CreateFile => new CreateFileInstruction(body),
+            InstructionType.Close => new CloseInstruction(),
             InstructionType.StepIn => new StepInInstruction(body),
             InstructionType.StepOut => new StepOutInstruction(),
             InstructionType.CreateDirectory => new CreateDirectoryInstruction(body),
-            InstructionType.Open => new OpenInstruction(body),
-            InstructionType.CreateFile => new CreateFileInstruction(body),
             InstructionType.DeleteFile => new DeleteFileInstruction(body),
             InstructionType.DeleteDirectory => new DeleteDirectoryInstruction(body),
+            InstructionType.PurgeDirectory => new PurgeDirectoryInstruction(body),
             _ => throw new ArgumentException($"Cannot parse type: '{type}' to an instruction type.")
         };
     }

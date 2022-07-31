@@ -6,11 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NALDownload.Instructions.Directories;
-public class StepOutInstruction : Instruction
+public class StepOutInstruction : EmptyInstruction
 {
-    // NO BODY
-
-    public StepOutInstruction() : base(InstructionType.StepOut, Array.Empty<byte>())
+    public StepOutInstruction() : base(InstructionType.StepOut)
     {
     }
 }

@@ -1,15 +1,4 @@
 ﻿using NALDownload.Instructions;
-using NALDownload.Instructions.Directories;
-using NALDownload.Instructions.Files;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VCDiff.Encoders;
 
 namespace NALDownload;
 public static class NALDownload
@@ -23,6 +12,28 @@ public static class NALDownload
 
         // Start enumeration from root
         await foreach (Instruction i in InstructionGenerator.EnumerateGeneratedDirectoryInstructionsAsync(oldVersionDirectoryPath, newVersionDirectoryPath, string.Empty, onProgressUpdate))
+            instructions.Add(i);
+
+        return instructions;
+    }
+
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    public static async Task<IEnumerable<Instruction>> GenerateVerificationInstructions(string directoryPath, Action<string>? onProgressUpdate = null)
+    {
+        if (!Directory.Exists(directoryPath))
+            throw new ArgumentException("Path must point into an existing directory");
+
+        List<Instruction> instructions = new();
+
+        // Start enumeration from root
+        await foreach (Instruction i in VerificationGenerator.EnumerateGeneratedDirectoryVerificationsAsync(directoryPath, string.Empty, onProgressUpdate))
             instructions.Add(i);
 
         return instructions;

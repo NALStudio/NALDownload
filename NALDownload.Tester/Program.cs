@@ -1,5 +1,6 @@
 ﻿using NALDownload.Instructions;
 using NALDownload.NALUpdate;
+using NALDownload.Tester.FileChecking;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,11 +15,6 @@ internal static class Program
 {
     private static async Task Main(string[] args)
     {
-        Console.WriteLine("MORE TESTING REQUIRED");
-        Console.WriteLine("MORE TESTING REQUIRED");
-        Console.WriteLine("MORE TESTING REQUIRED");
-        Console.WriteLine("MORE TESTING REQUIRED");
-
         ConsoleKeyInfo key;
         do
         {
@@ -27,6 +23,7 @@ internal static class Program
             Console.ResetColor();
             Console.WriteLine("A: Apply diff");
             Console.WriteLine("C: Create diff");
+            Console.WriteLine("P: Check directory files");
 
             key = Console.ReadKey();
             Console.Clear();
@@ -38,53 +35,31 @@ internal static class Program
                 case ConsoleKey.A:
                     await ApplyDiff();
                     break;
+                case ConsoleKey.P:
+                    await FileChecker.CheckDirFiles();
+                    break;
                 default:
-                    WriteError($"Invalid key: {key.Key}");
+                    TestingHelper.WriteError($"Invalid key: {key.Key}");
                     break;
             }
         }
         while (key.Key != ConsoleKey.Escape);
     }
 
-    private static void WriteError(string error)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(error);
-        Console.ResetColor();
-    }
-
-    private static string GetStringWithCheck(string prompt, Func<string, bool> verification)
-    {
-        Console.Clear();
-        string? value;
-        do
-        {
-            Console.WriteLine(prompt);
-            value = Console.ReadLine();
-            Console.Clear();
-
-            if (value is null)
-            {
-                WriteError("Out of lines.");
-            }
-            else if (!verification(value))
-            {
-                WriteError("Invalid input.");
-                value = null;
-            }
-        }
-        while (value is null);
-
-        return value;
-    }
-
     private static async Task CreateDiff()
     {
-        string oldDir = GetStringWithCheck("Input old version directory path:", p => Directory.Exists(p));
-        string newDir = GetStringWithCheck("Input new version directory path:", p => Directory.Exists(p));
-        string diffPath = GetStringWithCheck("Input diff file path:", p => !File.Exists(p));
+        string oldDir = TestingHelper.GetStringWithCheck("Input old version directory path:", p => Directory.Exists(p));
+        string newDir = TestingHelper.GetStringWithCheck("Input new version directory path:", p => Directory.Exists(p));
+        string diffPath = TestingHelper.GetStringWithCheck("Input diff file path:", p => !File.Exists(p));
 
         IEnumerable<Instruction> instructions = await NALDownload.GenerateUpdateInstructions(oldDir, newDir, update => Console.WriteLine(update));
+
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.Green;
+        foreach (Instruction i in instructions)
+            Console.WriteLine(i.Type + (i is PathInstruction pi ? $" '{pi.Path}'" : string.Empty));
+        Console.ResetColor();
+
         NALUpdateDocument doc = new(instructions);
         byte[] bytes = NALUpdateSerializer.Serialize(doc);
         await File.WriteAllBytesAsync(diffPath, bytes);
@@ -92,8 +67,8 @@ internal static class Program
 
     private static async Task ApplyDiff()
     {
-        string oldDir = GetStringWithCheck("Input old version directory path:", p => Directory.Exists(p));
-        string diffPath = GetStringWithCheck("Input diff file path:", p => File.Exists(p));
+        string oldDir = TestingHelper.GetStringWithCheck("Input old version directory path:", p => Directory.Exists(p));
+        string diffPath = TestingHelper.GetStringWithCheck("Input diff file path:", p => File.Exists(p));
 
         NALUpdateDocument doc = NALUpdateSerializer.Deserialize(await File.ReadAllBytesAsync(diffPath));
 
